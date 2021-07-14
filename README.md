@@ -4,6 +4,8 @@ This entry won't be as serious or instructional as other entries may be - this i
 
 Here follows the analysis that my team and I did on the Dunder Mifflin company and their need for a database.
 
+(Note that, although I lead the team, I did not solely do all of the work. I do not want to post my team members' information on the internet, but if a reputable person communicates privately with me, I can contact my team members and confirm whether they would be comfortable sharing their information with such a person. We also made a video about the project that is available on request, once again because I do not feel comfortable sharing anyone's media without their consent on who will be able to see it. Enjoy the project!)
+
 # Phase 1 - Database initial study
 
 <p align="center">
@@ -109,7 +111,7 @@ smoothly. This involves making sure that office stationery is available, as well
 maintenance responsibilities for the office. Any money spent by the administrator towards
 office upkeep must be recorded and filed.
 
-Company logo:
+<ins> Company logo: </ins>
 
 <p align="center">
   <img width="525" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/dunder-mifflin-logo-5E325D4D51-seeklogo.com.png">
@@ -458,3 +460,1202 @@ to handle the entire database.
 intervals to give them deliverables, and discuss the state of the project. This
 will use more of our time.
 
+# Phase 2 - Conceptual design
+
+## 1. Conceptual design
+### 1.1 Business rules
+
+* The database holds many businesses/persons who are restricted to only access certain
+parts of it.
+* An employee can be a sales employee.
+* An employee can be a delivery employee.
+* An employee can be a regional manager employee.
+* The sales employees get paid a base salary, the delivery employees get paid an hourly
+wage, and the regional manager employee gets paid a base salary.
+* A sales employee can make many deals for which they earn a commission.
+* Regional managers earn an annual 15% bonus if their branch is under budget.
+* Zero or many sales can be placed by one client, which is made by one and only one
+salesman.
+* All employees are entitled to only one employee ID.
+* Many businesses have only one client number if they place sales, or a vendor name if
+they supply products.
+* Every sale made is fined to only one client.
+* Multiple purchases by a business each generates a sale invoice number.
+* One client can have zero or many deliveries due, but a delivery is only due to one
+client.
+* One supplier can hold zero or mary contracts, which supplies one to many products to
+each branch.
+* A product can only be supplied by one contract, and a contract can only be held by
+one supplier.
+* Each branch can have zero or many supply contracts.
+* Many deliveries can be made by one driver.
+* Feedback received from multiple customers whether compliments or complaints are
+passed on to a single department and then resolved.
+* A single branch can have many employees.
+* A delivery vehicle can deliver multiple products.
+* Date requirements for the database have been stipulated in section 4.2 of Phase 1.
+
+### 1.2 Entity-Relationship diagram
+
+For the sake of brevity, I will only include the final ERD we submitted, after normalisation:
+
+<p align="center">
+  <img width="825" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/ERD.png">
+</p>
+
+The following elements can be seen in the ERD above:
+
+* Optional/Mandatory relationships
+  * We have certain optional relationships, such as in a poor year, a salesman
+might not make any sales, and SALE is thus in an optional relationship with
+SALESMAN.
+  * Another optional relationship exists between a CLIENT and its
+DELIVERIES_DUE, since at a given moment, a client may not require any
+deliveries to be made, but the client details are stored to be able to propose
+sales in the future.
+  * A mandatory relationship exists between a BRANCH and their PRODUCTs,
+since a branch would not exist without its inventory (a collection of
+PRODUCTs).
+* Weak / strong relationships
+  * A BRANCH has a weak relationship with EMPLOYEE, since the EMP_NUM
+does not depend on the BRANCH_NUM - this makes sense as an employee
+is employed by Dunder Mifflin, and not a specific branch, thus their primary
+key would not need to be identified by the branch they are in (see image on
+next page).
+  * BRANCH and SUPPLIER_CONTRACT has a strong relationship, since the
+specific contract will be determined by the branch it needs to supply.
+* Recursive relationships
+  * EMPLOYEE is a recursive relationship, since a regional manager employee is
+related to the delivery and sales employees by virtue of managing them - a regional manager can thus manage one or more employees, himself/herself
+also being an employee.
+* Weak entities
+  * The NEXT_OF_KIN entity is weak, since it is existence-dependent on the
+EMPLOYEE entity. Its primary key is derived from keys within the
+EMPLOYEE entity as well.
+  * In the same way, DELIVERIES_DUE is weak because the DEL_NUM will be
+generated from the SALES_INVOICE_NUM, and its existence depends on a
+sale being made.
+* Multi-valued attributes
+  * A CLIENT may have made more than one sale thus the SALE_INVOICE_NUM per client can be multi-valued. The same holds for
+DEL_NUM - a client may be expecting more than one delivery.
+  * In a SALE, a client may order more than one PRODUCT - thus MAT_NUM in
+SALE can also be multi-valued (see above).
+* Derived attributes
+  * The total salary of both the salesman and the regional manager can be
+derived from their employee salary and their commission/bonus.
+  * The total amount due per sale can be derived by multiplying the quantity by
+the price in the PRODUCT entity, and minussing the discount.
+
+# Phase 3 - Physical design
+## 1. Database objects
+### 1.1 Physical data model
+
+<p align="center">
+  <img width="825" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/physical.png">
+</p>
+
+### 1.2 Oracle physical data model
+<p align="center">
+  <img width="825" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/oraclephysical.png">
+</p>
+
+### 1.3 Creating tables
+
+```
+CREATE TABLE "EMPLOYEE" (
+"EMP_NUM" NUMBER(6),
+"BRANCH_NUM" NUMBER(4),
+"EMP_NAME" VARCHAR(100),
+"EMP_SURNAME" VARCHAR(100),
+PRIMARY KEY ("EMP_NUM")
+);
+```
+
+```
+CREATE TABLE "DELIVERY_STAFF" (
+"EMP_NUM" NUMBER(6),
+"BRANCH_NUM" NUMBER(4),
+"DELV_HRS_TRVLD" NUMBER(5),
+"DELV_WAGE" NUMBER(12,2),
+PRIMARY KEY ("EMP_NUM")
+);
+```
+
+```
+CREATE TABLE "SALESMAN" (
+"EMP_NUM" NUMBER(6),
+"BRANCH_NUM" NUMBER(4),
+"SLSMN_TRAVEL" CHAR,
+"SLSMN_COMMISSION" NUMBER(3,2),
+"SLSMN_TOTAL_SALARY" NUMBER(12,2),
+PRIMARY KEY ("EMP_NUM")
+);
+```
+
+```
+CREATE TABLE "REGIONAL_MANAGER" (
+"EMP_NUMBER" NUMBER(6),
+"BRANCH_NUM" NUMBER(4),
+"MAN_DATE_APPOINTED" DATE,
+"MAN_BONUS" NUMBER(12,2),
+"MAN_TOTAL_SALARY" NUMBER(12,2),
+PRIMARY KEY ("EMP_NUMBER")
+);
+```
+
+```
+CREATE TABLE "SALE" (
+"SALE_INVOICE_NUM" NUMBER(16),
+"MAT_NUM" NUMBER(6),
+"CLIENT_NUM" NUMBER(6),
+"EMP_NUM" NUMBER(6),
+"SALE_DISCOUNT" NUMBER(3,2),
+"SALE_QUANTITY" NUMBER(9),
+"SALE_TOTAL_DUE" NUMBER(12,2),
+"SALE_TYPE" VARCHAR(100),
+PRIMARY KEY ("SALE_INVOICE_NUM")
+);
+```
+
+```
+CREATE TABLE "CONTRACT_SALE" (
+"SALE_INVOICE_NUM" NUMBER(16),
+"MAT_NUM" NUMBER(6),
+"CLIENT_NUM" NUMBER(6),
+"EMP_NUM" NUMBER(6),
+"CONTR_START_DATE" DATE,
+"CONTR_EXPIRY_DATE" DATE,
+PRIMARY KEY ("SALE_INVOICE_NUM")
+);
+```
+
+```
+CREATE TABLE "ONCE_OFF_SALE" (
+"SALE_INVOICE_NUM" NUMBER(16),
+"MAT_NUM" NUMBER(6),
+"CLIENT_NUM" NUMBER(6),
+"EMP_NUM" NUMBER(6),
+"SALE_DATE" DATE,
+"SALE_TIIME" DATE,
+PRIMARY KEY ("SALE_INVOICE_NUM")
+);
+```
+
+```
+CREATE TABLE "BRANCH" (
+"BRANCH_NUM" NUMBER(4),
+"REG_MANAGER" VARCHAR(100),
+"BRANCH_PHYS_ADRESS" VARCHAR(100),
+"BRANCH_NUM_VEHICLES" NUMBER(4),
+PRIMARY KEY ("BRANCH_NUM")
+);
+```
+
+```
+CREATE TABLE "NEXT_OF_KIN" (
+"KIN_CONTACT, EMP_NUM" NUMBER(17),
+"KIN_SURNAME" VARCHAR(100),
+"KIN_NAME" VARCHAR(100)
+);
+```
+
+```
+CREATE TABLE "SUPPLIER_CONTRACT" (
+"CONTR_INVOICE_NUM" NUMBER(16),
+"BRANCH_NUM" NUMBER(4),
+"MAT_NUM" NUMBER(6),
+"VENDOR_NUM" NUMBER(5),
+"CONTR_AMOUNT" NUMBER(12,2),
+"CONTR_START_DATE" DATE,
+"CONTR_EXPIRY_DATE" DATE,
+"CONTR_DISCOUNT" NUMBER(3,2),
+PRIMARY KEY ("CONTR_INVOICE_NUM")
+);
+```
+
+```
+CREATE TABLE "PRODUCT" (
+"MAT_NUM" NUMBER(6),
+"BRANCH_NUM" NUMBER(4),
+"CONTR_INVOICE_NUM" VARCHAR(16),
+"PROD_DESCR" VARCHAR(16),
+"PROD_BIN_NUM" NUMBER(6),
+"PROD_QUANTITY_STOCKED" NUMBER(9),
+"PROD_QUALITY_CHECK" VARCHAR(100),
+"PROD_CERTIFICATES" VARCHAR(1000),
+"PROD_SPECIAL_INSTR" VARCHAR(100),
+"PROD_REORDER_POINT" NUMBER(1000),
+"PROD_MIN_ORDER_QUANT" NUMBER(9),
+"PROD_PRICE" NUMBER(12,2),
+PRIMARY KEY ("MAT_NUM")
+);
+```
+
+```
+CREATE TABLE "SUPPLIER" (
+"VENDOR_NUM" NUMBER(5),
+"VEND_NAME" VARCHAR(100),
+"VEND_PHYS_ADDRESS" VARCHAR(100),
+"VEN_PAY_TERMS" VARCHAR(1000),
+"VEN_ACCRED" CHAR,
+"VEN_TEL_NUM" NUMBER(11),
+"VEN_EMAIL" VARCHAR(100),
+"VEN_PERF_RATING" CHAR,
+"VEN_ANNUAL_SPENDING" NUMBER(12,2),
+PRIMARY KEY ("VENDOR_NUM")
+);
+```
+
+```
+CREATE TABLE "DELIVERY_VEHICLE" (
+"VEC_VIN" Type,
+"BRANCH_NUM" Type,
+"VEC_PLATE" Type,
+"VEC_MODL_NAME" Type,
+"VEC_MODEL_YR" Type,
+"VEC_SIZE" Type,
+"VEC_LAST_SERVICE" Type,
+"VEC_SERVICE_CODE" Type,
+"VEC_AVAILABLE" Type,
+PRIMARY KEY ("VEC_VIN")
+);
+```
+
+```
+CREATE TABLE "DELIVERIES_DUE" (
+"SALE_INVOICE_NUM" NUMBER(16),
+"DEL_NUM" NUMBER(7),
+"MAT_NUM" NUMBER(6),
+"DEL_LOCATION" VARCHAR(100),
+"DEL_DATE" DATE,
+PRIMARY KEY ("DEL_NUM")
+);
+```
+
+```
+CREATE TABLE "CLIENT" (
+"CLIENT_NUM" NUMBER(6),
+"CLIENT_NAME" VARCHAR(100),
+"CLIENT_PHYS_ADRRESS" VARCHAR(100),
+"CLIENT_TEL_NUM" NUMBER(11),
+"CLIENT_EMAIL" VARCHAR(100),
+"CLIENT_CONTRACT" VARCHAR(100),
+PRIMARY KEY ("CLIENT_NUM")
+);
+```
+
+```
+CREATE TABLE "DELIVERY_VEHICLE" (
+"VEC_VIN" Type,
+"BRANCH_NUM" Type,
+"VEC_PLATE" Type,
+"VEC_MODL_NAME" Type,
+"VEC_MODEL_YR" Type,
+"VEC_SIZE" Type,
+"VEC_LAST_SERVICE" Type,
+"VEC_SERVICE_CODE" Type,
+"VEC_AVAILABLE" Type,
+PRIMARY KEY ("VEC_VIN")
+);
+```
+
+### 1.4 Indexes 
+
+```
+CREATE INDEX "FK1" ON "REGIONAL_MANAGER" ("BRANCH_NUM");
+```
+
+```
+CREATE INDEX "FK1" ON "SALE" ("MAT_NUM");
+CREATE INDEX "FK2" ON "SALE" ("CLIENT_NUM");
+CREATE INDEX "FK3" ON "SALE" ("EMP_NUM");
+```
+
+```
+CREATE INDEX "FK1" ON "CONTRACT_SALE" ("MAT_NUM");
+CREATE INDEX "FK2" ON "CONTRACT_SALE" ("CLIENT_NUM");
+CREATE INDEX "FK3" ON "CONTRACT_SALE" ("EMP_NUM");
+```
+
+```
+CREATE INDEX "FK1" ON "ONCE_OFF_SALE" ("MAT_NUM");
+CREATE INDEX "FK2" ON "ONCE_OFF_SALE" ("CLIENT_NUM");
+CREATE INDEX "FK3" ON "ONCE_OFF_SALE" ("EMP_NUM");
+```
+
+```
+CREATE INDEX "FK1" ON "BRANCH" ("REG_MANAGER");
+```
+
+```
+CREATE INDEX "PK,FK1" ON "NEXT_OF_KIN" ("KIN_CONTACT, EMP_NUM");
+```
+
+```
+CREATE INDEX "PK,FK1" ON "SUPPLIER_CONTRACT" ("BRANCH_NUM");
+CREATE INDEX "FK2" ON "SUPPLIER_CONTRACT" ("MAT_NUM");
+CREATE INDEX "FK3" ON "SUPPLIER_CONTRACT" ("VENDOR_NUM");
+```
+
+```
+CREATE INDEX "PK,FK1" ON "PRODUCT" ("BRANCH_NUM");
+CREATE INDEX "FK2" ON "PRODUCT" ("CONTR_INVOICE_NUM");
+```
+
+```
+CREATE INDEX "PK,FK1" ON "DELIVERIES_DUE" ("SALE_INVOICE_NUM");
+CREATE INDEX "FK2" ON "DELIVERIES_DUE" ("MAT_NUM");
+```
+
+### 1.5 Constraints
+
+Some columns have special requirements for the database to work properly, and thus need
+constraints:
+
+```
+ALTER TABLE "BRANCH" MODIFY ("BRANCH_NUM" NOT NULL ENABLE);
+ALTER TABLE "CLIENT" MODIFY ("CLIENT_NUM" NOT NULL ENABLE);
+ALTER TABLE "CLIENT" ADD CONSTRAINT "UNIQUE_NAME" UNIQUE
+("CLIENT_NAME");
+ALTER TABLE "CONTRACT_SALE" MODIFY ("SALE_INVOICE_NUM" NOT NULL
+ENABLE);
+ALTER TABLE "CONTRACT_SALE" MODIFY ("PROD_NUM" NOT NULL ENABLE);
+ALTER TABLE "CONTRACT_SALE" MODIFY ("CLIENT_NUM" NOT NULL ENABLE);
+ALTER TABLE "DELIVERIES_DUE" MODIFY ("SALE_INVOICE_NUM" NOT NULL
+ENABLE);
+ALTER TABLE "DELIVERIES_DUE" MODIFY ("DEL_NUM" NOT NULL ENABLE);
+ALTER TABLE "DELIVERY_STAFF" MODIFY ("EMP_NUM" NOT NULL ENABLE);
+ALTER TABLE "EMPLOYEE" MODIFY ("EMP_NUM" NOT NULL ENABLE);
+ALTER TABLE "NEXT_OF_KIN" MODIFY ("EMP_NUM" NOT NULL ENABLE);
+ALTER TABLE "ONCE_OFF_SALE" MODIFY ("SALE_INVOICE_NUM" NOT NULL
+ENABLE);
+ALTER TABLE "PRODUCT" MODIFY ("MAT_NUM" NOT NULL ENABLE);
+ALTER TABLE "PRODUCT" MODIFY ("BRANCH_NUM" NOT NULL ENABLE);
+ALTER TABLE "PRODUCT" MODIFY ("CONTR_INVOICE_NUM" NOT NULL ENABLE);
+ALTER TABLE "REGIONAL_MANAGER" MODIFY ("EMP_NUM" NOT NULL ENABLE);
+ALTER TABLE "SALE" MODIFY ("SALE_INVOICE_NUM" NOT NULL ENABLE);
+ALTER TABLE "SALE" MODIFY ("PROD_NUM" NOT NULL ENABLE);
+ALTER TABLE "SALE" MODIFY ("CLIENT_NUM" NOT NULL ENABLE);
+ALTER TABLE "SALE" MODIFY ("EMP_NUM" NOT NULL ENABLE);
+ALTER TABLE "SALESMAN" MODIFY ("EMP_NUM" NOT NULL ENABLE);
+ALTER TABLE "SUPPLIER" MODIFY ("VENDOR_NUM" NOT NULL ENABLE);
+ALTER TABLE "SUPPLIER" ADD CONSTRAINT "UNIQUE_NAME_VEND" UNIQUE
+("VEND_NAME");
+ALTER TABLE "SUPPLIER_CONTRACT" MODIFY ("CONTR_INVOICE_NUM" NOT
+NULL ENABLE);
+```
+
+# 1.6 Data entry
+
+Data for each entity has been entered to test the functionality of the database as follows,
+either by using the **DATA** tab in Oracle SQL Developer, or by using the queries explained in
+the following sections.
+
+* BRANCH 
+<p align="center">
+  <img width="625" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/branch.png">
+</p>
+
+* CLIENT
+<p align="center">
+  <img width="625" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/client.png">
+</p>
+
+* CONTRACT_SALE
+<p align="center">
+  <img width="625" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/contract_sale.png">
+</p>
+
+* DELIVERIES_DUE
+<p align="center">
+  <img width="625" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/deliveries_due.png">
+</p>
+
+* DELIVERY_STAFF
+<p align="center">
+  <img width="625" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/delivery_staff.png">
+</p>
+
+* EMPLOYEE
+<p align="center">
+  <img width="625" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/employee.png">
+</p>
+
+* NEXT_OF_KIN
+<p align="center">
+  <img width="625" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/next_of_kin.png">
+</p>
+
+* ONCE_OFF_SALE
+<p align="center">
+  <img width="625" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/ONCE_OFF_SALE.png">
+</p>
+
+* PRODUCT
+<p align="center">
+  <img width="625" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/product.png">
+</p>
+
+* REGIONAL_MANAGER
+<p align="center">
+  <img width="625" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/regional_manager.png">
+</p>
+
+* SALE
+<p align="center">
+  <img width="625" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/sale.png">
+</p>
+
+* SALESMAN
+<p align="center">
+  <img width="625" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/salesman.png">
+</p>
+
+* SUPPLIER
+<p align="center">
+  <img width="625" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/supplier.png">
+</p>
+
+* SUPPLIER_CONTRACT
+<p align="center">
+  <img width="625" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/supplier_contract.png">
+</p>
+
+## 1.7 Views
+
+Firstly, we can create views for both the employees and the sales made by each individual
+branch:
+
+```
+CREATE VIEW scranton_emp_view AS SELECT * FROM EMPLOYEE WHERE
+BRANCH_NUM = 1702;
+CREATE VIEW akron_emp_view AS SELECT * FROM EMPLOYEE WHERE
+BRANCH_NUM = 1700;
+CREATE VIEW albany_emp_view AS SELECT * FROM EMPLOYEE WHERE
+BRANCH_NUM = 1704;
+CREATE VIEW nashua_emp_view AS SELECT * FROM EMPLOYEE WHERE
+BRANCH_NUM = 1703;
+CREATE VIEW rochester_emp_view AS SELECT * FROM EMPLOYEE WHERE
+BRANCH_NUM = 1705;
+CREATE VIEW utica_emp_view AS SELECT * FROM EMPLOYEE WHERE
+BRANCH_NUM = 1701;
+CREATE VIEW syracuse_emp_view AS SELECT * FROM EMPLOYEE WHERE
+BRANCH_NUM = 1706;
+
+CREATE VIEW scranton_sales_view AS SELECT * FROM SALE WHERE EMP_NUM IN
+(SELECT EMP_NUM FROM EMPLOYEE WHERE BRANCH_NUM = 1702);
+CREATE VIEW akron_sales_view AS SELECT * FROM SALE WHERE EMP_NUM IN
+(SELECT EMP_NUM FROM EMPLOYEE WHERE BRANCH_NUM = 1700);
+CREATE VIEW albany_sales_view AS SELECT * FROM SALE WHERE EMP_NUM IN
+(SELECT EMP_NUM FROM EMPLOYEE WHERE BRANCH_NUM = 1704);
+CREATE VIEW nashua_sales_view AS SELECT * FROM SALE WHERE EMP_NUM IN
+(SELECT EMP_NUM FROM EMPLOYEE WHERE BRANCH_NUM = 1703);
+CREATE VIEW rochester_sales_view AS SELECT * FROM SALE WHERE EMP_NUM IN
+(SELECT EMP_NUM FROM EMPLOYEE WHERE BRANCH_NUM = 1705);
+CREATE VIEW utica_sales_view AS SELECT * FROM SALE WHERE EMP_NUM IN
+(SELECT EMP_NUM FROM EMPLOYEE WHERE BRANCH_NUM = 1701);
+CREATE VIEW syracuse_sales_view AS SELECT * FROM SALE WHERE EMP_NUM IN
+(SELECT EMP_NUM FROM EMPLOYEE WHERE BRANCH_NUM = 1706);
+```
+
+We can see that, for example, the Scranton views, show only data of the Scranton branch:
+
+<p align="center">
+  <img width="625" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/views.png">
+</p>
+
+But if we wish to see the company from an overall perspective, we can use the following
+views:
+
+```
+CREATE VIEW dm_emp_view AS SELECT * FROM EMPLOYEE;
+CREATE VIEW dm_sales_view AS SELECT * FROM SALE;
+```
+
+We can also get a more chronological view of the sales’ history, and which client bought
+which product, using this view:
+
+```
+CREATE VIEW combsales_view
+AS SELECT o.SALE_DATE_TIME, o.SALE_INVOICE_NUM, c.CLIENT_NAME,
+p.PROD_DESCR
+FROM ONCE_OFF_SALE o
+JOIN CLIENT c USING(CLIENT_NUM)
+JOIN PRODUCT p USING(PROD_NUM)
+ORDER BY o.SALE_DATE_TIME ASC;
+```
+
+A similar view can be done for the contract sales, but this view can instead be used by a
+salesman to check when a contract is close to expiring, and then using the view to contact
+the clients closer to the top to try and sell a new contract to them, thus also calculating how
+long the current contract is, to be able to personalise their call, sticking to the company’s
+ethic of close relations:
+
+```
+CREATE VIEW contractsales_view
+AS SELECT o.CONTR_EXPIRY_DATE, o.SALE_INVOICE_NUM, c.CLIENT_NAME,
+p.PROD_DESCR, MONTHS_BETWEEN(o.CONTR_EXPIRY_DATE,
+o.CONTR_START_DATE) as "Current contract's length (in MONTHS)"
+FROM CONTRACT_SALE o
+JOIN CLIENT c USING(CLIENT_NUM)
+JOIN PRODUCT p USING(PROD_NUM)
+ORDER BY o.CONTR_EXPIRY_DATE ASC;
+```
+
+We can create two views to see all the current salesmen who are either travelling or
+in-branch:
+
+```
+-- Travelling salesmen view --
+
+CREATE OR REPLACE VIEW travsales_view
+AS SELECT e.BRANCH_NUM, e.EMP_NAME, e.EMP_SURNAME, s.SLSMN_TRAVEL
+FROM EMPLOYEE e INNER JOIN SALESMAN s USING (EMP_NUM)
+WHERE s.SLSMN_TRAVEL = 'Y';
+
+-- In-branch salesmen view --
+
+CREATE OR REPLACE VIEW officesales_view
+AS SELECT e.BRANCH_NUM, e.EMP_NAME, e.EMP_SURNAME, s.SLSMN_TRAVEL
+FROM EMPLOYEE e INNER JOIN SALESMAN s USING (EMP_NUM)
+WHERE s.SLSMN_TRAVEL = 'N';
+```
+
+We can also create a view to see which materials are currently stocked using a contract with
+a supplier:
+
+```
+CREATE VIEW prodcontract_view
+AS SELECT p.MAT_NUM, p.BRANCH_NUM, p.PROD_DESCR, s.VENDOR_NUM,
+s.CONTR_AMOUNT, s.CONTR_START_DATE, s.CONTR_EXPIRY_DATE,
+s.CONTR_DISCOUNT
+FROM PRODUCT p
+INNER JOIN SUPPLIER_CONTRACT s USING (CONTR_INVOICE_NUM);
+```
+
+Another view which can be created is to be able to see all of the branch managers in a flash:
+
+```
+CREATE VIEW managers_view
+AS SELECT e.BRANCH_NUM, CONCAT(CONCAT(e.EMP_NAME, ' '),
+e.EMP_SURNAME) as "Manager details", r.MAN_DATE_APPOINTED,
+r.MAN_TOTAL_SALARY
+FROM EMPLOYEE e
+INNER JOIN REGIONAL_MANAGER r USING (EMP_NUM);
+```
+
+Yet another view would be to list all suppliers and the number of contracts each of them
+holds:
+
+```
+CREATE VIEW suppliers_view
+AS SELECT s.VEND_NAME, s.VEND_PHYS_ADDRESS,
+s.VEND_TEL_NUM, s.VEND_PERF_RATING, c.BRANCH_NUM,
+COUNT(c.contr_invoice_num) as "NUMBER OF CONTRACTS",
+SUM(c.CONTR_AMOUNT) as "TOTAL CONTRACTS AMOUNT"
+FROM SUPPLIER s JOIN SUPPLIER_CONTRACT c
+USING(vendor_num) GROUP BY
+s.VEND_NAME, s.VEND_PHYS_ADDRESS,
+s.VEND_TEL_NUM, s.VEND_PERF_RATING,
+c.BRANCH_NUM;
+```
+
+## 2. Queries
+### 2.1 Ensuring company specifications
+
+According to the analysis of the company that we completed in Phase 1, we conclude that
+Dunder Mifflin requires the following in the database, and thus also include the SQL code to
+implement these requirements:
+
+* Access restriction (corporate can see and edit data of all branches, and employees
+will get access to their respective branch’s view)
+
+```
+-- Create views for specific branches --
+-- For this section, we use the same views as defined in Section 1.4, to see the employees
+and sales for each individual branch --
+
+-- Create user for each branch and headquarters with password --
+CREATE USER corporate_usr IDENTIFIED BY Corporate11111;
+CREATE USER scranton_usr IDENTIFIED BY Scranton1111;
+CREATE USER akron_usr IDENTIFIED BY Akron111111111;
+CREATE USER albany_usr IDENTIFIED BY Albany111111111111;
+CREATE USER nashua_usr IDENTIFIED BY Nashua11111111111111;
+CREATE USER rochester_usr IDENTIFIED BY Rochester11111;
+CREATE USER utica_usr IDENTIFIED BY Utica11111111111;
+CREATE USER syracuse_usr IDENTIFIED BY Syracuse1111;
+
+-- Create synonyms for all these views so that they can be used to give access --
+CREATE public synonym SCRANEMP for scranton_emp_view;
+CREATE public synonym SCRANSALE for scranton_sales_view;
+CREATE public synonym AKEMP for akron_emp_view;
+CREATE public synonym AKSALE for akron_sales_view;
+CREATE public synonym ALEMP for albany_emp_view;
+CREATE public synonym ALSALE for albany_sales_view;
+CREATE public synonym NASHEMP for nashua_emp_view;
+CREATE public synonym NASHSALE for nashua_sales_view;
+CREATE public synonym ROEMP for rochester_emp_view;
+CREATE public synonym ROSALE for rochester_sales_view;
+CREATE public synonym UTEMP for utica_emp_view;
+CREATE public synonym UTSALE for utica_sales_view;
+CREATE public synonym SYEMP for syracuse_emp_view;
+CREATE public synonym SYSALE for syracuse_sales_view;
+
+-- Assign corporate access to each branch’s data --
+GRANT ALL ON SCRANEMP to corporate_usr;
+GRANT ALL ON SCRANSALE to corporate_usr;
+GRANT ALL ON AKEMP to corporate_usr;
+GRANT ALL ON AKSALE to corporate_usr;
+GRANT ALL ON ALEMP to corporate_usr;
+GRANT ALL ON ALSALE to corporate_usr;
+GRANT ALL ON NASHEMP to corporate_usr;
+GRANT ALL ON NASHSALE to corporate_usr;
+GRANT ALL ON ROEMP to corporate_usr;
+GRANT ALL ON ROSALE to corporate_usr;
+GRANT ALL ON UTEMP to corporate_usr;
+GRANT ALL ON UTSALE to corporate_usr;
+GRANT ALL ON SYEMP to corporate_usr;
+GRANT ALL ON SYSALE to corporate_usr;
+
+-- Assign branch user access to see the date from their branch--
+GRANT SELECT ON SCRANEMP to scranton_usr;
+GRANT SELECT ON SCRANSALE to scranton_usr;
+GRANT SELECT ON AKEMP to akron_usr;
+GRANT SELECT ON AKSALE to akron_usr;
+GRANT SELECT ON ALEMP to albany_usr;
+GRANT SELECT ON ALSALE to albany_usr;
+GRANT SELECT ON NASHEMP to nashua_usr;
+GRANT SELECT ON NASHSALE to nashua_usr;
+GRANT SELECT ON ROEMP to rochester_usr;
+GRANT SELECT ON ROSALE to rochester_usr;
+GRANT SELECT ON UTEMP to utica_usr;
+GRANT SELECT ON UTSALE to utica_usr;
+GRANT SELECT ON SYEMP to syracuse_usr;
+GRANT SELECT ON SYSALE to syracuse_usr;
+```
+
+* Tallying compliments and complaints per salesman in the database.
+
+```
+accept x number prompt "Enter the employee number of the person you wish to report:";
+accept y number prompt "Has this employee received a compliment (1) or complaint (2)?";
+declare
+emp number := &x;
+choice number := &y;
+BEGIN
+IF(choice = 1) THEN
+UPDATE EMPLOYEE SET EMP_COMPLMNTS = EMP_COMPLMNTS + 1
+WHERE EMP_NUM = emp;
+ELSIF(choice = 2) THEN
+UPDATE EMPLOYEE SET EMP_COMPLAINTS = EMP_COMPLAINTS + 1
+WHERE EMP_NUM = emp;
+END IF;
+END;
+```
+
+* Allow clerks to enter data when a sale is made.
+
+```
+ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MON-YYYY HH24:MI:SS';
+SET SERVEROUTPUT ON;
+accept mat number prompt "Please enter material number of item purchased:"
+accept clnt number prompt "Please enter client number of purchase:"
+accept emp number prompt "Please enter employee number who facilitated purchase:"
+accept discount number prompt "Please enter total amount of discount granted (in
+Rands):"
+accept quant number prompt "Please enter total quantity of item purchased:"
+accept purchtype number prompt "Please enter type of purchase made (1 for once-off sale
+and 2 for contract sale):"
+declare
+mat number := &mat;
+clnt number := &clnt;
+emp number := &emp;
+discount number := &discount;
+quant number := &quant;
+purchtype number := &purchtype;
+sale_total number;
+invoice number := INVOICE_SEQ.NEXTVAL;
+branch number;
+prodnum varchar(8);
+quantleft number;
+BEGIN
+SELECT BRANCH_NUM INTO branch FROM EMPLOYEE WHERE
+EMP_NUM=emp;
+prodnum := CONCAT(TO_CHAR(branch),TO_CHAR(mat));
+SELECT PROD_PRICE INTO sale_total FROM PRODUCT WHERE PROD_NUM
+= prodnum;
+SELECT PROD_QUANTITY_STOCKED INTO quantleft FROM PRODUCT
+WHERE PROD_NUM = prodnum;
+IF(quantleft-quant < 0)THEN
+dbms_output.put_line('NOT ENOUGH STOCK LEFT!');
+return;
+END IF;
+sale_total := sale_total * quant;
+sale_total := sale_total - discount;
+IF(purchtype=1) THEN
+INSERT INTO SALE(SALE_INVOICE_NUM, PROD_NUM, CLIENT_NUM,
+EMP_NUM, SALE_DISCOUNT, SALE_QUANTITY, SALE_TOTAL_DUE, SALE_TYPE)
+VALUES (invoice, prodnum, clnt, emp, discount, quant, sale_total, 'O');
+INSERT INTO ONCE_OFF_SALE(SALE_INVOICE_NUM, PROD_NUM,
+CLIENT_NUM, EMP_NUM, SALE_DATE_TIME) VALUES(invoice, prodnum, clnt, emp,
+CURRENT_DATE);
+ELSIF(purchtype=2) THEN
+INSERT INTO SALE(SALE_INVOICE_NUM, PROD_NUM, CLIENT_NUM,
+EMP_NUM, SALE_DISCOUNT, SALE_QUANTITY, SALE_TOTAL_DUE, SALE_TYPE)
+VALUES (invoice, prodnum, clnt, emp, discount, quant, sale_total, 'C');
+INSERT INTO CONTRACT_SALE(SALE_INVOICE_NUM, PROD_NUM,
+CLIENT_NUM, EMP_NUM, CONTR_START_DATE, CONTR_EXPIRY_DATE)
+VALUES(invoice, prodnum, clnt, emp, SYSDATE, add_months(SYSDATE,12));
+END IF;
+END;
+```
+
+* Sale triggers a delivery man to be assigned to the sale based on hours worked and
+the branch where the order was placed, as well as automation of delivery due dates:
+
+```
+-- Execute immediately after clerk entry query --
+
+create or replace TRIGGER DELV_TRIG
+AFTER INSERT ON SALE
+REFERENCING OLD AS OLD NEW AS NEW
+FOR EACH ROW
+BEGIN
+declare
+address varchar2(100);
+branch number;
+travelled number;
+delvman number;
+BEGIN
+SELECT CLIENT_PHYS_ADRRESS INTO address FROM ADMIN.CLIENT
+WHERE CLIENT_NUM = :new.CLIENT_NUM;
+SELECT BRANCH_NUM INTO branch FROM ADMIN.EMPLOYEE WHERE
+EMP_NUM = :new.emp_num;
+SELECT DELV_HRS_TRVLD INTO travelled FROM (SELECT
+BRANCH_NUM,MIN(DELV_HRS_TRVLD) AS DELV_HRS_TRVLD FROM
+DELIVERY_STAFF GROUP BY BRANCH_NUM) WHERE BRANCH_NUM=branch;
+SELECT emp_num INTO delvman FROM DELIVERY_STAFF WHERE
+DELV_HRS_TRVLD = travelled AND BRANCH_NUM=branch;
+INSERT INTO
+ADMIN.DELIVERIES_DUE(SALE_INVOICE_NUM,DEL_NUM,PROD_NUM,DEL_LOCATI
+ON,DEL_DATE,EMP_NUM) values
+(:new.SALE_INVOICE_NUM,DEL_SEQ.NEXTVAL,:new.PROD_NUM,address,SYSDATE(
+)+7,delvman);
+END;
+END;
+```
+
+* Automate inventory deductions when a sale is made.
+
+```
+-- Execute immediately after clerk entry query --
+
+create or replace TRIGGER PRODMIN_TRIG
+AFTER INSERT ON SALE
+REFERENCING OLD AS OLD NEW AS NEW
+FOR EACH ROW
+BEGIN
+UPDATE ADMIN.PRODUCT SET prod_quantity_stocked =
+prod_quantity_stocked-:new.SALE_QUANTITY WHERE PROD_NUM =
+:new.PROD_NUM;
+END;
+```
+
+* Determining if the manager bonus is necessary, and then adding it to his total salary.
+
+```
+accept x number prompt "Enter branch number:"
+accept y number prompt "Was your branch under budget? (Yes = 1, No = 2)"
+declare
+branch number := &x;
+man number;
+choice number := &y;
+BEGIN
+SELECT EMP_NUM INTO man FROM REGIONAL_MANAGER WHERE
+BRANCH_NUM = branch;
+IF(choice = 1) THEN
+UPDATE REGIONAL_MANAGER SET MAN_BONUS = MAN_TOTAL_SALARY *
+0.15 WHERE EMP_NUM = man;
+UPDATE REGIONAL_MANAGER SET MAN_TOTAL_SALARY =
+MAN_TOTAL_SALARY + MAN_BONUS WHERE EMP_NUM = man;
+ELSIF(choice = 2) THEN
+UPDATE REGIONAL_MANAGER SET MAN_TOTAL_SALARY =
+MAN_TOTAL_SALARY - MAN_BONUS WHERE EMP_NUM = man;
+UPDATE REGIONAL_MANAGER SET MAN_BONUS = 0 WHERE EMP_NUM =
+man;
+END IF;
+END;
+```
+
+* Generate reports based on the efficiency of sales per employee and branch.
+
+```
+-- See how all employees are selling --
+SELECT EMP_NUM AS "Employee Number", EMP_NAME AS "Employee Name",
+EMP_SURNAME AS "Employee surname", COUNT(SALE_INVOICE_NUM) AS "Total
+sales made"
+FROM SALE JOIN EMPLOYEE
+USING (EMP_NUM)
+GROUP BY EMP_NUM, EMP_SURNAME, EMP_NAME;
+
+-- See how all branches are selling --
+SELECT B.BRANCH_NUM, B.BRANCH_PHYS_ADRESS AS "Branch name",
+COUNT(SL.SALE_INVOICE_NUM) AS "Total sales made"
+FROM BRANCH B
+FULL OUTER JOIN EMPLOYEE EM
+ON (B.BRANCH_NUM = EM.BRANCH_NUM)
+FULL OUTER JOIN SALE SL
+ON(SL.EMP_NUM = EM.EMP_NUM)
+GROUP BY B.BRANCH_NUM, B.BRANCH_PHYS_ADRESS
+ORDER BY COUNT(SL.SALE_INVOICE_NUM) DESC;
+
+-- Calculate average sales per branch --
+SELECT B.BRANCH_NUM, B.BRANCH_PHYS_ADRESS AS "Branch name",
+ROUND(AVG(SL.SALE_TOTAL_DUE)) AS "Average of sales"
+FROM BRANCH B
+FULL OUTER JOIN EMPLOYEE EM
+ON (B.BRANCH_NUM = EM.BRANCH_NUM)
+FULL OUTER JOIN SALE SL
+ON(SL.EMP_NUM = EM.EMP_NUM)
+GROUP BY B.BRANCH_NUM, B.BRANCH_PHYS_ADRESS
+ORDER BY COUNT(SL.SALE_INVOICE_NUM) DESC;
+```
+
+* Update inventory when new stock is delivered:
+
+```
+SET SERVEROUTPUT ON;
+accept a number prompt "Enter branch number:"
+accept x number prompt "Enter material number of product delivered:"
+accept z number prompt "Enter quantity of product ordered:"
+
+declare
+branch number := &a;
+mat number := &x;
+quantity number := &z;
+exist number;
+prodnum varchar(8) := CONCAT(TO_CHAR(branch),TO_CHAR(mat));
+
+BEGIN
+SELECT COUNT(PROD_NUM) INTO exist FROM PRODUCT WHERE
+PROD_NUM=prodnum;
+IF(exist=1)THEN
+UPDATE PRODUCT SET PROD_QUANTITY_STOCKED =
+(PROD_QUANTITY_STOCKED + quantity) WHERE PROD_NUM=prodnum;
+ELSIF(exist=0)THEN
+dbms_output.put_line('No product found matching description. If this is the first
+time this product has been delivered, please make sure that a supplier contract has been
+created when the order was placed.');
+END IF;
+END;
+```
+
+* Create a new supplier contract (note that Dunder Mifflin only buys products via
+contract):
+
+```
+accept a number prompt "Enter the material number:"
+accept b number prompt "Enter branch number where to deliver:"
+accept c number prompt "Enter supplier invoice number received:"
+accept d char prompt "Enter product description:"
+accept e number prompt "Enter product bin number:"
+37
+accept f char prompt "This product has passed the quality check (True/False):"
+accept g char prompt "Enter special certificates for this product (otherwise None):"
+accept h char prompt "Enter product special instructions (otherwise None):"
+accept i number prompt "Enter product reorder point:"
+accept j number prompt "Enter minimum order quantity of product:"
+accept k number prompt "Enter price of one unit of this product:"
+accept l number prompt "Enter the vendor number of the supplier:"
+accept m number prompt "Enter total charged for order:"
+accept o number prompt "Enter the duration of the contract in MONTHS:"
+accept p number prompt "Enter discount received on contract:"
+
+declare
+quantity number := 0;
+mat number := &a;
+branch number := &b;
+invoice number := &c;
+descrip varchar2(100) := '&d';
+bin number := &e;
+quality varchar2(100) := '&f';
+cert varchar2(100) := '&g';
+instruct varchar2(100) := '&h';
+reorder number := &i;
+minquant number := &j;
+price number := &k;
+vendnum number := &l;
+charge number := &m;
+nummonths number := &o;
+discount number := &p;
+existvend number;
+prodnum varchar(8) := CONCAT(TO_CHAR(branch),TO_CHAR(mat));
+
+BEGIN
+SELECT count(vendor_num) into existvend FROM SUPPLIER WHERE
+vendor_num = vendnum;
+IF(existvend = 1)THEN
+INSERT INTO PRODUCT(MAT_NUM, BRANCH_NUM, CONTR_INVOICE_NUM,
+PROD_DESCR, PROD_BIN_NUM, PROD_QUANTITY_STOCKED,
+PROD_QUALITY_CHECK, PROD_CERTIFICATES, PROD_SPECIAL_INSTR,
+PROD_REORDER_POINT, PROD_MIN_ORDER_QUANT, PROD_PRICE, PROD_NUM)
+VALUES(mat, branch, to_char(invoice), descrip, bin, quantity, quality, cert, instruct,
+reorder, minquant, price, prodnum);
+INSERT INTO SUPPLIER_CONTRACT(CONTR_INVOICE_NUM,
+BRANCH_NUM, MAT_NUM, VENDOR_NUM, CONTR_AMOUNT,
+CONTR_START_DATE, CONTR_EXPIRY_DATE, CONTR_DISCOUNT)
+VALUES(invoice, branch, mat, vendnum, charge, SYSDATE,
+add_months(SYSDATE,nummonths), discount);
+ELSIF(existvend = 0)THEN
+dbms_output.put_line('No supplier found in our database to start this contract with.
+Please first create a new supplier record.');
+END IF;
+END;
+```
+
+* Create a new supplier:
+
+```
+-- Create new supplier (done by clerk when ordering) --
+accept b char prompt "Enter vendor name:"
+accept c char prompt "Enter physical address of vendor:"
+accept d char prompt "Enter pay terms of the vendor:"
+accept e char prompt "This vendor is accredited (True/False):"
+accept f char prompt "Enter telephone number of vendor:"
+accept g char prompt "Enter email address of vendor:"
+accept h number prompt "Enter performance rating of vendor (Out of 10):"
+
+declare
+vendnum number := VEND_SEQ.NEXTVAL;
+vendname varchar2(100) := '&b';
+address varchar2(100) := '&c';
+pay varchar2(1000) := '&d';
+cred varchar2(6) := '&e';
+tel varchar2(10) := '&f';
+email varchar2(100) := '&g';
+perf number := &h;
+
+BEGIN
+INSERT INTO SUPPLIER(VENDOR_NUM, VEND_NAME,
+VEND_PHYS_ADDRESS, VEND_PAY_TERMS, VEND_ACCRED, VEND_TEL_NUM,
+VEND_EMAIL, VEND_PERF_RATING, VEND_ANNUAL_SPENDING)
+VALUES (vendnum, vendname, address, pay, cred, tel, email, perf, 0);
+END;
+```
+
+## 2.2 Sequences used
+
+The following sequences were used to populate columns that needed incrementation, such
+as where primary keys are generated whenever a record is added:
+
+```
+-- Material number sequence --
+
+CREATE SEQUENCE "MATNUM_SEQ" MINVALUE 1 MAXVALUE
+9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20
+NOORDER
+NOCYCLE ;
+
+CREATE OR REPLACE TRIGGER "MATNUM_TRG"
+BEFORE INSERT ON PRODUCT
+FOR EACH ROW
+BEGIN
+<<COLUMN_SEQUENCES>>
+BEGIN
+IF INSERTING AND :NEW.MAT_NUM IS NULL THEN
+SELECT MATNUM_SEQ.NEXTVAL INTO :NEW.MAT_NUM FROM SYS.DUAL;
+END IF ;
+END COLUMN_SEQUENCES;
+END ;
+/
+ALTER TRIGGER "MATNUM_TRG" ENABLE ;
+
+-- Invoice number sequence --
+
+CREATE SEQUENCE "INVOICE_SEQ" MINVALUE 1 MAXVALUE
+9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20
+NOORDER
+NOCYCLE ;
+
+CREATE OR REPLACE TRIGGER "INVOICE_TRG"
+BEFORE INSERT ON SALE
+FOR EACH ROW
+BEGIN
+<<COLUMN_SEQUENCES>>
+BEGIN
+IF INSERTING AND :NEW.SALE_INVOICE_NUM IS NULL THEN
+SELECT INVOICE_SEQ.NEXTVAL INTO :NEW.SALE_INVOICE_NUM FROM
+SYS.DUAL;
+END IF ;
+END COLUMN_SEQUENCES;
+END ;
+/
+ALTER TRIGGER "INVOICE_TRG" ENABLE ;
+
+-- Delivery number sequence --
+
+CREATE SEQUENCE "DELNUM_SEQ" MINVALUE 1 MAXVALUE
+9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20
+NOORDER
+NOCYCLE ;
+
+CREATE OR REPLACE TRIGGER "DELNUM_TRG"
+BEFORE INSERT ON DELIVERIES_DUE
+FOR EACH ROW
+BEGIN
+<<COLUMN_SEQUENCES>>
+BEGIN
+IF INSERTING AND :NEW.DEL_NUM IS NULL THEN
+SELECT DELNUM_SEQ.NEXTVAL INTO :NEW.DEL_NUM FROM SYS.DUAL;
+END IF ;
+END COLUMN_SEQUENCES;
+END ;
+/
+ALTER TRIGGER "DELNUM_TRG" ENABLE ;
+```
+
+### 2.3 Extra functionality
+
+Other desired inferences that the company want to make from the database, but which was
+not requested for us in our commission, includes (with their respective SQL code):
+
+* Identify top-selling salesman, by summing the total revenue they have made for
+Dunder Mifflin (run each block separately):
+
+```
+-- Top-selling employees (Top 10) --
+
+CREATE TABLE sale_temp AS SELECT EMP_NUM AS EMP_NUM,
+SUM(SALE_TOTAL_DUE) AS SALE_TOTAL
+FROM SALE
+GROUP BY EMP_NUM;
+
+SELECT EMPLOYEE.EMP_NUM, CONCAT(CONCAT(EMPLOYEE.EMP_NAME, ' '),
+EMPLOYEE.EMP_SURNAME) AS "Employee details", sale_temp.SALE_TOTAL AS
+"Total of sales made"
+FROM EMPLOYEE
+INNER JOIN sale_temp
+ON EMPLOYEE.EMP_NUM = sale_temp.EMP_NUM
+ORDER BY sale_temp.SALE_TOTAL DESC
+FETCH NEXT 10 ROWS ONLY;
+
+DROP TABLE sale_temp PURGE;
+```
+
+* Identify salesmen who are performing poorly, by counting the number of sales they
+have made (run each block separately):
+
+```
+accept x number prompt 'Enter the number of sales where, below this number of sales
+made, an employee is considered as selling poorly:'
+
+CREATE TABLE sale_temp AS SELECT EMP_NUM AS
+EMP_NUM,COUNT(SALE_TOTAL_DUE) AS SALE_NUMBER
+FROM SALE
+GROUP BY EMP_NUM
+HAVING COUNT(SALE_TOTAL_DUE) < &x;
+
+SELECT EMPLOYEE.EMP_NUM, CONCAT(CONCAT(EMPLOYEE.EMP_NAME, ' '),
+EMPLOYEE.EMP_SURNAME) AS "Employee details", sale_temp.SALE_NUMBER AS
+"Total number of sales made"
+FROM EMPLOYEE
+INNER JOIN sale_temp
+ON EMPLOYEE.EMP_NUM = sale_temp.EMP_NUM;
+
+DROP TABLE sale_temp PURGE;
+```
+
+* Flag salesmen with a large amount of complaints or compliments (more than 10).
+
+```
+-- Employees with troubling amount of complaints --
+SELECT EMP_NUM, CONCAT(CONCAT(EMP_NAME, ' '), EMP_SURNAME) AS
+"Employees with more than 10 complaints", EMP_COMPLAINTS FROM EMPLOYEE
+WHERE EMP_COMPLAINTS >= 10;
+
+-- Employees with good amount of compliments
+SELECT EMP_NUM, CONCAT(CONCAT(EMP_NAME, ' '), EMP_SURNAME) AS
+"Employees with more than 10 compliments", EMP_COMPLMNTS FROM EMPLOYEE
+WHERE EMP_COMPLMNTS >= 10;
+```
+
+* A clerk can run this daily to check which products have reached reorder point.
+
+```
+SELECT MAT_NUM, BRANCH_NUM, PROD_DESCR, PROD_QUANTITY_STOCKED
+AS "Product on hand", PROD_REORDER_POINT AS "Reorder point"
+FROM PRODUCT
+WHERE PROD_QUANTITY_STOCKED <= PROD_REORDER_POINT;
+```
+
+* Update annual spending for the supplier of choice:
+
+```
+accept z number prompt 'Which supplier to you wish to update the annual spending for:'
+
+declare
+supp number := &z;
+
+BEGIN
+UPDATE SUPPLIER SET VEND_ANNUAL_SPENDING = (SELECT
+SUM(CONTR_AMOUNT) FROM SUPPLIER_CONTRACT GROUP BY VENDOR_NUM
+HAVING VENDOR_NUM = supp)
+WHERE VENDOR_NUM = supp;
+END;
+```
+
+* A salesman might want to search for a specific type of product, but can only
+remember some of its name. Thus employee can search the database using this
+query:
+
+```
+accept find_product prompt 'Give any part of the name of your product:'
+
+SELECT * FROM PRODUCT WHERE PROD_DESCR LIKE '%'||'&find_product'||'%';
+```
+
+* Allow delivery staff to check vehicles in and out:
+
+```
+SET SERVEROUTPUT ON;
+SELECT VEC_PLATE AS "Vehicles Available" FROM DELV_VEHICLE WHERE
+VEC_AVAIL = 'Y' AND VEC_BRANCH = &branch;
+accept x number prompt"Enter your employee number:"
+accept y char prompt"Are you taking out (O) or returning (R) a vehicle?"
+accept z char prompt"Enter vehicle license plate number:"
+
+declare
+emp number := &x;
+choice varchar2(1) := '&y';
+license varchar2(6) := '&z';
+validemp number;
+branch number;
+
+BEGIN
+SELECT count(emp_num) INTO validemp FROM DELIVERY_STAFF WHERE
+EMP_NUM = emp;
+IF(validemp=1 AND UPPER(choice)='O')THEN
+UPDATE DELV_VEHICLE SET VEC_AVAIL = 'N' WHERE
+VEC_PLATE=UPPER(license);
+UPDATE DELV_VEHICLE SET EMP_NUM = emp WHERE
+VEC_PLATE=UPPER(license);
+ELSIF(validemp=1 AND UPPER(choice)='R')THEN
+UPDATE DELV_VEHICLE SET VEC_AVAIL = 'Y' WHERE
+VEC_PLATE=UPPER(license);
+UPDATE DELV_VEHICLE SET EMP_NUM = null WHERE
+VEC_PLATE=UPPER(license);
+ELSIF(validemp=0)THEN
+dbms_output.put_line('Invalid employee number!');
+END IF;
+END;
+```
+
+* A quality assurance officer might want to be able to quickly pull up which products
+still need to pass the test, or which products need special handling:
+
+```
+SELECT MAT_NUM, BRANCH_NUM, PROD_DESCR, PROD_QUALITY_CHECK,
+PROD_SPECIAL_INSTR, PROD_QUANTITY_STOCKED
+FROM PRODUCT WHERE PROD_QUALITY_CHECK = 'False' OR NOT
+PROD_SPECIAL_INSTR = 'None';
+```
