@@ -6,12 +6,50 @@ Here follows the analysis that my team and I did on the Dunder Mifflin company a
 
 (Note that, although I lead the team, I did not solely do all of the work. I do not want to post my team members' information on the internet, but if a reputable person communicates privately with me, I can contact my team members and confirm whether they would be comfortable sharing their information with such a person. We also made a video about the project that is available on request, once again because I do not feel comfortable sharing anyone's media without their consent on who will be able to see it. Enjoy the project!)
 
+## Table of contents
+
+[Phase 1 - Database initial study](#1)
+[1. Company background](#2)
+[2. Analysing the Company situation](#3)
+[2.1 Company objectives](#4)
+[2.2 Company operations](#5)
+[2.3 Organisational structure](#6)
+[3. Defining Problems and Constraints](#7)
+[3.1 Problems](#8)
+[3.2 Constraints](#9)
+[4. Database System Specification](#10)
+[4.1 Objectives to solve identified problems](#11)
+[4.2 Information that company requires from database](#12)
+[4.5 Scope](#13)
+[4.6 Boundaries](#14)
+
+[Phase 2 - Conceptual design](#15)
+[1. Conceptual design](#16)
+[1.1 Business rules](#17)
+[1.2 Entity-Relationship diagram](#18)
+
+[Phase 3 - Physical design](#19)
+[1. Database objects](#20)
+[1.1 Physical data model](#21)
+[1.2 Oracle physical data model](#22)
+[1.3 Creating tables](#23)
+[1.4 Indexes](#24)
+[1.5 Constraints](#25)
+[1.6 Data entry](#26)
+[1.7 Views](#27)
+[2. Queries](#28)
+[2.1 Ensuring company specifications](#29)
+[2.2 Sequences used](#30)
+[2.3 Extra functionality](#31)
+
+<a name="1"></a>
 # Phase 1 - Database initial study
 
 <p align="center">
   <img width="625" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/phase1intro.png">
 </p>
 
+<a name="2"></a>
 ## 1. Company background
 
 Dunder Mifflin is a paper and office supplies supplier founded in 1949 by Robert Dunder and
@@ -35,7 +73,9 @@ in data sharing between each branch’s sales and warehouse department, but also
 corporate the chance to monitor the efficiency of each branch, and make sure that
 everything operates smoothly.
 
+<a name="3"></a>
 ## 2. Analysing the Company situation
+<a name="4"></a>
 ### 2.1 Company objectives
 
 Dunder Mifflin’s goal is to cater to local and small businesses’ paper and office needs. The
@@ -50,6 +90,7 @@ their staff.
 * Earning and retaining the loyalty of their customers through charity work for the
 community and sending gifts to clients’ offices.
 
+<a name="5"></a>
 ### 2.2 Company operations
 
 Dunder Mifflin’s role in the community is to serve as a middle-man retailer between paper
@@ -117,6 +158,7 @@ office upkeep must be recorded and filed.
   <img width="525" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/dunder-mifflin-logo-5E325D4D51-seeklogo.com.png">
 </p>
 
+<a name="6"></a>
 ### 2.3 Organisational structure
 
 Dunder Mifflin is governed top-down by their Corporate Headquarters’ branch in New York
@@ -135,7 +177,9 @@ a regional branch.
   <img width="825" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/DM_ORGCHART.jpg">
 </p>
 
+<a name="7"></a>
 ## 3. Defining Problems and Constraints
+<a name="8"></a>
 ### 3.1 Problems
 
 * Orders made are not placed to the warehouse on time.
@@ -162,6 +206,7 @@ reports, as well as combine reports of branches for corporate.
 who don’t receive timely deliveries.
 * No fill in for sick or ill drivers.
 
+<a name="9"></a>
 ### 3.2 Constraints
 
 * Each contract may only involve one salesman.
@@ -174,7 +219,9 @@ either available or not at a certain time.
 * Each order to a supplier has an invoice number.
 * Each salesman earns 1% commission on a sale they made.
 
+<a name="10"></a>
 ## 4. Database System Specification
+<a name="11"></a>
 ### 4.1 Objectives to solve identified problems
 
 In order to solve Dunder Mifflin’s problems, a database is a clear solution. This way all the
@@ -236,7 +283,7 @@ database to see what tasks need to be fulfilled.
 * Useful reports for management to reward branches/salespeople with bonuses or
 promotions.
 
-
+<a name="12"></a>
 ### 4.2 Information that company requires from database
 
 Ultimately, the company wants to know when sales are made, and how that affects the
@@ -384,6 +431,7 @@ And corporate received information on:
 * Performance comparisons of branches
 * Over-/Under-performing salesmen
 
+<a name="13"></a>
 ### 4.5 Scope
 
 There are several interrelated problems in Dunder Mifflin that can be solved using a single
@@ -428,7 +476,8 @@ salesmen. The sales are recorded purely to be able to dispatch deliveries, and r
 salesman’s history, so that corporate can track possible promotion candidates. The salaries
 of salesmen are also recorded for this purpose.
 
-### 4.4 Boundaries
+<a name="14"></a>
+### 4.6 Boundaries
 
 There exists different levels of boundaries to build this database:
 
@@ -460,9 +509,11 @@ to handle the entire database.
 intervals to give them deliverables, and discuss the state of the project. This
 will use more of our time.
 
+<a name="15"></a>
 # Phase 2 - Conceptual design
-
+<a name="16"></a>
 ## 1. Conceptual design
+<a name="17"></a>
 ### 1.1 Business rules
 
 * The database holds many businesses/persons who are restricted to only access certain
@@ -495,6 +546,7 @@ passed on to a single department and then resolved.
 * A delivery vehicle can deliver multiple products.
 * Date requirements for the database have been stipulated in section 4.2 of Phase 1.
 
+<a name="18"></a>
 ### 1.2 Entity-Relationship diagram
 
 For the sake of brevity, I will only include the final ERD we submitted, after normalisation:
@@ -546,19 +598,24 @@ derived from their employee salary and their commission/bonus.
   * The total amount due per sale can be derived by multiplying the quantity by
 the price in the PRODUCT entity, and minussing the discount.
 
+<a name="19"></a>
 # Phase 3 - Physical design
+<a name="20"></a>
 ## 1. Database objects
+<a name="21"></a>
 ### 1.1 Physical data model
 
 <p align="center">
   <img width="825" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/physical.png">
 </p>
 
+<a name="22"></a>
 ### 1.2 Oracle physical data model
 <p align="center">
   <img width="825" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/oraclephysical.png">
 </p>
 
+<a name="23"></a>
 ### 1.3 Creating tables
 
 ```
@@ -759,6 +816,7 @@ PRIMARY KEY ("VEC_VIN")
 );
 ```
 
+<a name="24"></a>
 ### 1.4 Indexes 
 
 ```
@@ -807,6 +865,7 @@ CREATE INDEX "PK,FK1" ON "DELIVERIES_DUE" ("SALE_INVOICE_NUM");
 CREATE INDEX "FK2" ON "DELIVERIES_DUE" ("MAT_NUM");
 ```
 
+<a name="25"></a>
 ### 1.5 Constraints
 
 Some columns have special requirements for the database to work properly, and thus need
@@ -845,6 +904,7 @@ ALTER TABLE "SUPPLIER_CONTRACT" MODIFY ("CONTR_INVOICE_NUM" NOT
 NULL ENABLE);
 ```
 
+<a name="26"></a>
 # 1.6 Data entry
 
 Data for each entity has been entered to test the functionality of the database as follows,
@@ -888,7 +948,7 @@ the following sections.
 
 * ONCE_OFF_SALE
 <p align="center">
-  <img width="625" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/ONCE_OFF_SALE.png">
+  <img width="625" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/once_off_sale.png">
 </p>
 
 * PRODUCT
@@ -921,6 +981,7 @@ the following sections.
   <img width="625" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/supplier_contract.png">
 </p>
 
+<a name="27"></a>
 ## 1.7 Views
 
 Firstly, we can create views for both the employees and the sales made by each individual
@@ -1060,7 +1121,9 @@ s.VEND_TEL_NUM, s.VEND_PERF_RATING,
 c.BRANCH_NUM;
 ```
 
+<a name="28"></a>
 ## 2. Queries
+<a name="29"></a>
 ### 2.1 Ensuring company specifications
 
 According to the analysis of the company that we completed in Phase 1, we conclude that
@@ -1442,7 +1505,7 @@ VEND_EMAIL, VEND_PERF_RATING, VEND_ANNUAL_SPENDING)
 VALUES (vendnum, vendname, address, pay, cred, tel, email, perf, 0);
 END;
 ```
-
+<a name="30"></a>
 ## 2.2 Sequences used
 
 The following sequences were used to populate columns that needed incrementation, such
@@ -1513,7 +1576,7 @@ END ;
 /
 ALTER TRIGGER "DELNUM_TRG" ENABLE ;
 ```
-
+<a name="31"></a>
 ### 2.3 Extra functionality
 
 Other desired inferences that the company want to make from the database, but which was
