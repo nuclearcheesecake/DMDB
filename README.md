@@ -13,34 +13,34 @@ Here follows the analysis that my team and I did on the Dunder Mifflin company a
 2. [Analysing the Company situation](#3)
 2.1 [Company objectives](#4)
 2.2 [Company operations](#5)
-[2.3 Organisational structure](#6)
-[3. Defining Problems and Constraints](#7)
-[3.1 Problems](#8)
-[3.2 Constraints](#9)
-[4. Database System Specification](#10)
-[4.1 Objectives to solve identified problems](#11)
-[4.2 Information that company requires from database](#12)
-[4.5 Scope](#13)
-[4.6 Boundaries](#14)
+2.3 [Oanisational structure](#6)
+3. [Defining Problems and Constraints](#7)
+3.1 [Problems](#8)
+3.2 [Constraints](#9)
+4. [Database System Specification](#10)
+4.1[Objectives to solve identified problems](#11)
+4.2 [Information that company requires from database](#12)
+4.3 [Scope](#13)
+4.4 [Boundaries](#14)
 
 [Phase 2 - Conceptual design](#15)
-[1. Conceptual design](#16)
-[1.1 Business rules](#17)
-[1.2 Entity-Relationship diagram](#18)
+1. [Conceptual design](#16)
+1.1 [Business rules](#17)
+1.2 [Entity-Relationship diagram](#18)
 
 [Phase 3 - Physical design](#19)
-[1. Database objects](#20)
-[1.1 Physical data model](#21)
-[1.2 Oracle physical data model](#22)
-[1.3 Creating tables](#23)
-[1.4 Indexes](#24)
-[1.5 Constraints](#25)
-[1.6 Data entry](#26)
-[1.7 Views](#27)
-[2. Queries](#28)
-[2.1 Ensuring company specifications](#29)
-[2.2 Sequences used](#30)
-[2.3 Extra functionality](#31)
+1. [Database objects](#20)
+1.1 [Physical data model](#21)
+1.2 [Oracle physical data model](#22)
+1.3 [Creating tables](#23)
+1.4 [Indexes](#24)
+1.5 [Constraints](#25)
+1.6 [Data entry](#26)
+1.7 [Views](#27)
+2. [Queries](#28)
+2.1 [Ensuring company specifications](#29)
+2.2 [Sequences used](#30)
+2.3 [Extra functionality](#31)
 
 <a name="1"></a>
 # Phase 1 - Database initial study
@@ -432,7 +432,7 @@ And corporate received information on:
 * Over-/Under-performing salesmen
 
 <a name="13"></a>
-### 4.5 Scope
+### 4.3 Scope
 
 There are several interrelated problems in Dunder Mifflin that can be solved using a single
 database. The database we create will thus be a conglomeration of the following areas of
@@ -477,7 +477,7 @@ salesman’s history, so that corporate can track possible promotion candidates.
 of salesmen are also recorded for this purpose.
 
 <a name="14"></a>
-### 4.6 Boundaries
+### 4.4 Boundaries
 
 There exists different levels of boundaries to build this database:
 
