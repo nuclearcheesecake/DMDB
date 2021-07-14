@@ -7,7 +7,7 @@ Here follows the analysis that my team and I did on the Dunder Mifflin company a
 # Phase 1 - Database initial study
 
 <p align="center">
-  <img width="825" src="https://github.com/nuclearcheesecake/wickusgoogledataanalyticscertificate2021/blob/main/Misc/course.png">
+  <img width="825" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/phase1intro.png">
 </p>
 
 ## 1. Company background
@@ -112,7 +112,7 @@ office upkeep must be recorded and filed.
 Company logo:
 
 <p align="center">
-  <img width="825" src="https://github.com/nuclearcheesecake/wickusgoogledataanalyticscertificate2021/blob/main/Misc/course.png">
+  <img width="825" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/dunder-mifflin-logo-5E325D4D51-seeklogo.com.png">
 </p>
 
 ### 2.3 Organisational structure
@@ -130,7 +130,7 @@ this day.
 a regional branch.
 
 <p align="center">
-  <img width="825" src="https://github.com/nuclearcheesecake/wickusgoogledataanalyticscertificate2021/blob/main/Misc/course.png">
+  <img width="825" src="https://github.com/nuclearcheesecake/DMDB/blob/main/misc/DM_ORGCHART.jpg">
 </p>
 
 ## 3. Defining Problems and Constraints
