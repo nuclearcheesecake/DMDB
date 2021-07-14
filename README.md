@@ -9,10 +9,10 @@ Here follows the analysis that my team and I did on the Dunder Mifflin company a
 ## Table of contents
 
 [Phase 1 - Database initial study](#1)
-[1. Company background](#2)
-[2. Analysing the Company situation](#3)
-[2.1 Company objectives](#4)
-[2.2 Company operations](#5)
+1. [Company background](#2)
+2. [Analysing the Company situation](#3)
+2.1 [Company objectives](#4)
+2.2 [Company operations](#5)
 [2.3 Organisational structure](#6)
 [3. Defining Problems and Constraints](#7)
 [3.1 Problems](#8)
