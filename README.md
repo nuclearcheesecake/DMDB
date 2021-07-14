@@ -1229,6 +1229,7 @@ Rands):"
 accept quant number prompt "Please enter total quantity of item purchased:"
 accept purchtype number prompt "Please enter type of purchase made (1 for once-off sale
 and 2 for contract sale):"
+
 declare
 mat number := &mat;
 clnt number := &clnt;
@@ -1241,6 +1242,7 @@ invoice number := INVOICE_SEQ.NEXTVAL;
 branch number;
 prodnum varchar(8);
 quantleft number;
+
 BEGIN
 SELECT BRANCH_NUM INTO branch FROM EMPLOYEE WHERE
 EMP_NUM=emp;
@@ -1283,6 +1285,7 @@ create or replace TRIGGER DELV_TRIG
 AFTER INSERT ON SALE
 REFERENCING OLD AS OLD NEW AS NEW
 FOR EACH ROW
+
 BEGIN
 declare
 address varchar2(100);
@@ -1329,10 +1332,12 @@ END;
 ```
 accept x number prompt "Enter branch number:"
 accept y number prompt "Was your branch under budget? (Yes = 1, No = 2)"
+
 declare
 branch number := &x;
 man number;
 choice number := &y;
+
 BEGIN
 SELECT EMP_NUM INTO man FROM REGIONAL_MANAGER WHERE
 BRANCH_NUM = branch;
