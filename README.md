@@ -618,7 +618,7 @@ the price in the PRODUCT entity, and minussing the discount.
 <a name="23"></a>
 ### 1.3 Creating tables
 
-```
+```sql
 CREATE TABLE "EMPLOYEE" (
 "EMP_NUM" NUMBER(6),
 "BRANCH_NUM" NUMBER(4),
@@ -628,7 +628,7 @@ PRIMARY KEY ("EMP_NUM")
 );
 ```
 
-```
+```sql
 CREATE TABLE "DELIVERY_STAFF" (
 "EMP_NUM" NUMBER(6),
 "BRANCH_NUM" NUMBER(4),
@@ -638,7 +638,7 @@ PRIMARY KEY ("EMP_NUM")
 );
 ```
 
-```
+```sql
 CREATE TABLE "SALESMAN" (
 "EMP_NUM" NUMBER(6),
 "BRANCH_NUM" NUMBER(4),
@@ -649,7 +649,7 @@ PRIMARY KEY ("EMP_NUM")
 );
 ```
 
-```
+```sql
 CREATE TABLE "REGIONAL_MANAGER" (
 "EMP_NUMBER" NUMBER(6),
 "BRANCH_NUM" NUMBER(4),
@@ -660,7 +660,7 @@ PRIMARY KEY ("EMP_NUMBER")
 );
 ```
 
-```
+```sql
 CREATE TABLE "SALE" (
 "SALE_INVOICE_NUM" NUMBER(16),
 "MAT_NUM" NUMBER(6),
@@ -674,7 +674,7 @@ PRIMARY KEY ("SALE_INVOICE_NUM")
 );
 ```
 
-```
+```sql
 CREATE TABLE "CONTRACT_SALE" (
 "SALE_INVOICE_NUM" NUMBER(16),
 "MAT_NUM" NUMBER(6),
@@ -686,7 +686,7 @@ PRIMARY KEY ("SALE_INVOICE_NUM")
 );
 ```
 
-```
+```sql
 CREATE TABLE "ONCE_OFF_SALE" (
 "SALE_INVOICE_NUM" NUMBER(16),
 "MAT_NUM" NUMBER(6),
@@ -698,7 +698,7 @@ PRIMARY KEY ("SALE_INVOICE_NUM")
 );
 ```
 
-```
+```sql
 CREATE TABLE "BRANCH" (
 "BRANCH_NUM" NUMBER(4),
 "REG_MANAGER" VARCHAR(100),
@@ -708,7 +708,7 @@ PRIMARY KEY ("BRANCH_NUM")
 );
 ```
 
-```
+```sql
 CREATE TABLE "NEXT_OF_KIN" (
 "KIN_CONTACT, EMP_NUM" NUMBER(17),
 "KIN_SURNAME" VARCHAR(100),
@@ -716,7 +716,7 @@ CREATE TABLE "NEXT_OF_KIN" (
 );
 ```
 
-```
+```sql
 CREATE TABLE "SUPPLIER_CONTRACT" (
 "CONTR_INVOICE_NUM" NUMBER(16),
 "BRANCH_NUM" NUMBER(4),
@@ -730,7 +730,7 @@ PRIMARY KEY ("CONTR_INVOICE_NUM")
 );
 ```
 
-```
+```sql
 CREATE TABLE "PRODUCT" (
 "MAT_NUM" NUMBER(6),
 "BRANCH_NUM" NUMBER(4),
@@ -748,7 +748,7 @@ PRIMARY KEY ("MAT_NUM")
 );
 ```
 
-```
+```sql
 CREATE TABLE "SUPPLIER" (
 "VENDOR_NUM" NUMBER(5),
 "VEND_NAME" VARCHAR(100),
@@ -763,7 +763,7 @@ PRIMARY KEY ("VENDOR_NUM")
 );
 ```
 
-```
+```sql
 CREATE TABLE "DELIVERY_VEHICLE" (
 "VEC_VIN" Type,
 "BRANCH_NUM" Type,
@@ -778,7 +778,7 @@ PRIMARY KEY ("VEC_VIN")
 );
 ```
 
-```
+```sql
 CREATE TABLE "DELIVERIES_DUE" (
 "SALE_INVOICE_NUM" NUMBER(16),
 "DEL_NUM" NUMBER(7),
@@ -789,7 +789,7 @@ PRIMARY KEY ("DEL_NUM")
 );
 ```
 
-```
+```sql
 CREATE TABLE "CLIENT" (
 "CLIENT_NUM" NUMBER(6),
 "CLIENT_NAME" VARCHAR(100),
@@ -801,7 +801,7 @@ PRIMARY KEY ("CLIENT_NUM")
 );
 ```
 
-```
+```sql
 CREATE TABLE "DELIVERY_VEHICLE" (
 "VEC_VIN" Type,
 "BRANCH_NUM" Type,
@@ -819,48 +819,48 @@ PRIMARY KEY ("VEC_VIN")
 <a name="24"></a>
 ### 1.4 Indexes 
 
-```
+```sql
 CREATE INDEX "FK1" ON "REGIONAL_MANAGER" ("BRANCH_NUM");
 ```
 
-```
+```sql
 CREATE INDEX "FK1" ON "SALE" ("MAT_NUM");
 CREATE INDEX "FK2" ON "SALE" ("CLIENT_NUM");
 CREATE INDEX "FK3" ON "SALE" ("EMP_NUM");
 ```
 
-```
+```sql
 CREATE INDEX "FK1" ON "CONTRACT_SALE" ("MAT_NUM");
 CREATE INDEX "FK2" ON "CONTRACT_SALE" ("CLIENT_NUM");
 CREATE INDEX "FK3" ON "CONTRACT_SALE" ("EMP_NUM");
 ```
 
-```
+```sql
 CREATE INDEX "FK1" ON "ONCE_OFF_SALE" ("MAT_NUM");
 CREATE INDEX "FK2" ON "ONCE_OFF_SALE" ("CLIENT_NUM");
 CREATE INDEX "FK3" ON "ONCE_OFF_SALE" ("EMP_NUM");
 ```
 
-```
+```sql
 CREATE INDEX "FK1" ON "BRANCH" ("REG_MANAGER");
 ```
 
-```
+```sql
 CREATE INDEX "PK,FK1" ON "NEXT_OF_KIN" ("KIN_CONTACT, EMP_NUM");
 ```
 
-```
+```sql
 CREATE INDEX "PK,FK1" ON "SUPPLIER_CONTRACT" ("BRANCH_NUM");
 CREATE INDEX "FK2" ON "SUPPLIER_CONTRACT" ("MAT_NUM");
 CREATE INDEX "FK3" ON "SUPPLIER_CONTRACT" ("VENDOR_NUM");
 ```
 
-```
+```sql
 CREATE INDEX "PK,FK1" ON "PRODUCT" ("BRANCH_NUM");
 CREATE INDEX "FK2" ON "PRODUCT" ("CONTR_INVOICE_NUM");
 ```
 
-```
+```sql
 CREATE INDEX "PK,FK1" ON "DELIVERIES_DUE" ("SALE_INVOICE_NUM");
 CREATE INDEX "FK2" ON "DELIVERIES_DUE" ("MAT_NUM");
 ```
@@ -871,7 +871,7 @@ CREATE INDEX "FK2" ON "DELIVERIES_DUE" ("MAT_NUM");
 Some columns have special requirements for the database to work properly, and thus need
 constraints:
 
-```
+```sql
 ALTER TABLE "BRANCH" MODIFY ("BRANCH_NUM" NOT NULL ENABLE);
 ALTER TABLE "CLIENT" MODIFY ("CLIENT_NUM" NOT NULL ENABLE);
 ALTER TABLE "CLIENT" ADD CONSTRAINT "UNIQUE_NAME" UNIQUE
@@ -987,7 +987,7 @@ the following sections.
 Firstly, we can create views for both the employees and the sales made by each individual
 branch:
 
-```
+```sql
 CREATE VIEW scranton_emp_view AS SELECT * FROM EMPLOYEE WHERE
 BRANCH_NUM = 1702;
 CREATE VIEW akron_emp_view AS SELECT * FROM EMPLOYEE WHERE
@@ -1028,7 +1028,7 @@ We can see that, for example, the Scranton views, show only data of the Scranton
 But if we wish to see the company from an overall perspective, we can use the following
 views:
 
-```
+```sql
 CREATE VIEW dm_emp_view AS SELECT * FROM EMPLOYEE;
 CREATE VIEW dm_sales_view AS SELECT * FROM SALE;
 ```
@@ -1036,7 +1036,7 @@ CREATE VIEW dm_sales_view AS SELECT * FROM SALE;
 We can also get a more chronological view of the sales’ history, and which client bought
 which product, using this view:
 
-```
+```sql
 CREATE VIEW combsales_view
 AS SELECT o.SALE_DATE_TIME, o.SALE_INVOICE_NUM, c.CLIENT_NAME,
 p.PROD_DESCR
@@ -1052,7 +1052,7 @@ the clients closer to the top to try and sell a new contract to them, thus also 
 long the current contract is, to be able to personalise their call, sticking to the company’s
 ethic of close relations:
 
-```
+```sql
 CREATE VIEW contractsales_view
 AS SELECT o.CONTR_EXPIRY_DATE, o.SALE_INVOICE_NUM, c.CLIENT_NAME,
 p.PROD_DESCR, MONTHS_BETWEEN(o.CONTR_EXPIRY_DATE,
@@ -1066,7 +1066,7 @@ ORDER BY o.CONTR_EXPIRY_DATE ASC;
 We can create two views to see all the current salesmen who are either travelling or
 in-branch:
 
-```
+```sql
 -- Travelling salesmen view --
 
 CREATE OR REPLACE VIEW travsales_view
@@ -1085,7 +1085,7 @@ WHERE s.SLSMN_TRAVEL = 'N';
 We can also create a view to see which materials are currently stocked using a contract with
 a supplier:
 
-```
+```sql
 CREATE VIEW prodcontract_view
 AS SELECT p.MAT_NUM, p.BRANCH_NUM, p.PROD_DESCR, s.VENDOR_NUM,
 s.CONTR_AMOUNT, s.CONTR_START_DATE, s.CONTR_EXPIRY_DATE,
@@ -1096,7 +1096,7 @@ INNER JOIN SUPPLIER_CONTRACT s USING (CONTR_INVOICE_NUM);
 
 Another view which can be created is to be able to see all of the branch managers in a flash:
 
-```
+```sql
 CREATE VIEW managers_view
 AS SELECT e.BRANCH_NUM, CONCAT(CONCAT(e.EMP_NAME, ' '),
 e.EMP_SURNAME) as "Manager details", r.MAN_DATE_APPOINTED,
@@ -1108,7 +1108,7 @@ INNER JOIN REGIONAL_MANAGER r USING (EMP_NUM);
 Yet another view would be to list all suppliers and the number of contracts each of them
 holds:
 
-```
+```sql
 CREATE VIEW suppliers_view
 AS SELECT s.VEND_NAME, s.VEND_PHYS_ADDRESS,
 s.VEND_TEL_NUM, s.VEND_PERF_RATING, c.BRANCH_NUM,
@@ -1133,7 +1133,7 @@ implement these requirements:
 * Access restriction (corporate can see and edit data of all branches, and employees
 will get access to their respective branch’s view)
 
-```
+```sql
 -- Create views for specific branches --
 -- For this section, we use the same views as defined in Section 1.4, to see the employees
 and sales for each individual branch --
@@ -1199,7 +1199,7 @@ GRANT SELECT ON SYSALE to syracuse_usr;
 
 * Tallying compliments and complaints per salesman in the database.
 
-```
+```sql
 accept x number prompt "Enter the employee number of the person you wish to report:";
 accept y number prompt "Has this employee received a compliment (1) or complaint (2)?";
 declare
@@ -1218,7 +1218,7 @@ END;
 
 * Allow clerks to enter data when a sale is made.
 
-```
+```sql
 ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MON-YYYY HH24:MI:SS';
 SET SERVEROUTPUT ON;
 accept mat number prompt "Please enter material number of item purchased:"
@@ -1278,7 +1278,7 @@ END;
 * Sale triggers a delivery man to be assigned to the sale based on hours worked and
 the branch where the order was placed, as well as automation of delivery due dates:
 
-```
+```sql
 -- Execute immediately after clerk entry query --
 
 create or replace TRIGGER DELV_TRIG
@@ -1313,7 +1313,7 @@ END;
 
 * Automate inventory deductions when a sale is made.
 
-```
+```sql
 -- Execute immediately after clerk entry query --
 
 create or replace TRIGGER PRODMIN_TRIG
@@ -1329,7 +1329,7 @@ END;
 
 * Determining if the manager bonus is necessary, and then adding it to his total salary.
 
-```
+```sql
 accept x number prompt "Enter branch number:"
 accept y number prompt "Was your branch under budget? (Yes = 1, No = 2)"
 
@@ -1357,7 +1357,7 @@ END;
 
 * Generate reports based on the efficiency of sales per employee and branch.
 
-```
+```sql
 -- See how all employees are selling --
 SELECT EMP_NUM AS "Employee Number", EMP_NAME AS "Employee Name",
 EMP_SURNAME AS "Employee surname", COUNT(SALE_INVOICE_NUM) AS "Total
@@ -1391,7 +1391,7 @@ ORDER BY COUNT(SL.SALE_INVOICE_NUM) DESC;
 
 * Update inventory when new stock is delivered:
 
-```
+```sql
 SET SERVEROUTPUT ON;
 accept a number prompt "Enter branch number:"
 accept x number prompt "Enter material number of product delivered:"
@@ -1421,7 +1421,7 @@ END;
 * Create a new supplier contract (note that Dunder Mifflin only buys products via
 contract):
 
-```
+```sql
 accept a number prompt "Enter the material number:"
 accept b number prompt "Enter branch number where to deliver:"
 accept c number prompt "Enter supplier invoice number received:"
@@ -1483,7 +1483,7 @@ END;
 
 * Create a new supplier:
 
-```
+```sql
 -- Create new supplier (done by clerk when ordering) --
 accept b char prompt "Enter vendor name:"
 accept c char prompt "Enter physical address of vendor:"
@@ -1516,7 +1516,7 @@ END;
 The following sequences were used to populate columns that needed incrementation, such
 as where primary keys are generated whenever a record is added:
 
-```
+```sql
 -- Material number sequence --
 
 CREATE SEQUENCE "MATNUM_SEQ" MINVALUE 1 MAXVALUE
@@ -1590,7 +1590,7 @@ not requested for us in our commission, includes (with their respective SQL code
 * Identify top-selling salesman, by summing the total revenue they have made for
 Dunder Mifflin (run each block separately):
 
-```
+```sql
 -- Top-selling employees (Top 10) --
 
 CREATE TABLE sale_temp AS SELECT EMP_NUM AS EMP_NUM,
@@ -1613,7 +1613,7 @@ DROP TABLE sale_temp PURGE;
 * Identify salesmen who are performing poorly, by counting the number of sales they
 have made (run each block separately):
 
-```
+```sql
 accept x number prompt 'Enter the number of sales where, below this number of sales
 made, an employee is considered as selling poorly:'
 
@@ -1635,7 +1635,7 @@ DROP TABLE sale_temp PURGE;
 
 * Flag salesmen with a large amount of complaints or compliments (more than 10).
 
-```
+```sql
 -- Employees with troubling amount of complaints --
 SELECT EMP_NUM, CONCAT(CONCAT(EMP_NAME, ' '), EMP_SURNAME) AS
 "Employees with more than 10 complaints", EMP_COMPLAINTS FROM EMPLOYEE
@@ -1649,7 +1649,7 @@ WHERE EMP_COMPLMNTS >= 10;
 
 * A clerk can run this daily to check which products have reached reorder point.
 
-```
+```sql
 SELECT MAT_NUM, BRANCH_NUM, PROD_DESCR, PROD_QUANTITY_STOCKED
 AS "Product on hand", PROD_REORDER_POINT AS "Reorder point"
 FROM PRODUCT
@@ -1658,7 +1658,7 @@ WHERE PROD_QUANTITY_STOCKED <= PROD_REORDER_POINT;
 
 * Update annual spending for the supplier of choice:
 
-```
+```sql
 accept z number prompt 'Which supplier to you wish to update the annual spending for:'
 
 declare
@@ -1676,7 +1676,7 @@ END;
 remember some of its name. Thus employee can search the database using this
 query:
 
-```
+```sql
 accept find_product prompt 'Give any part of the name of your product:'
 
 SELECT * FROM PRODUCT WHERE PROD_DESCR LIKE '%'||'&find_product'||'%';
@@ -1684,7 +1684,7 @@ SELECT * FROM PRODUCT WHERE PROD_DESCR LIKE '%'||'&find_product'||'%';
 
 * Allow delivery staff to check vehicles in and out:
 
-```
+```sql
 SET SERVEROUTPUT ON;
 SELECT VEC_PLATE AS "Vehicles Available" FROM DELV_VEHICLE WHERE
 VEC_AVAIL = 'Y' AND VEC_BRANCH = &branch;
@@ -1721,7 +1721,7 @@ END;
 * A quality assurance officer might want to be able to quickly pull up which products
 still need to pass the test, or which products need special handling:
 
-```
+```sql
 SELECT MAT_NUM, BRANCH_NUM, PROD_DESCR, PROD_QUALITY_CHECK,
 PROD_SPECIAL_INSTR, PROD_QUANTITY_STOCKED
 FROM PRODUCT WHERE PROD_QUALITY_CHECK = 'False' OR NOT
