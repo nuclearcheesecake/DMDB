@@ -13,7 +13,7 @@ Here follows the analysis that my team and I did on the Dunder Mifflin company a
 2. [Analysing the Company situation](#3)
   - 2.1 [Company objectives](#4)
   - 2.2 [Company operations](#5)
-  - 2.3 [Oanisational structure](#6)
+  - 2.3 [Organisational structure](#6)
 3. [Defining Problems and Constraints](#7)
   - 3.1 [Problems](#8)
   - 3.2 [Constraints](#9)
